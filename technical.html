@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Deep Dive - AI.Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .tech-diagram {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+            border: 1px dashed var(--primary-teal);
+            text-align: center;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin-top: 1rem;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">AI.Nexus</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="education.html">Education</a></li>
+                <li><a href="technical.html" class="active">Technical</a></li>
+                <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" style="min-height: 60vh;">
+            <div class="floating-shape shape-2" style="bottom: 20%; right: 10%;"></div>
+            <div class="container hero-content">
+                <h1>Under the Hood</h1>
+                <p>How do machines learn to play? Exploring Reinforcement Learning and Computer Vision.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="card-grid">
+                <div class="card" style="grid-column: span 1;">
+                    <h2>Reinforcement Learning (RL)</h2>
+                    <p>Agents learn by trial and error, receiving "rewards" for good actions and "penalties" for bad
+                        ones.</p>
+                    <div class="tech-diagram">
+                        Agent ➡️ Action ➡️ Environment ➡️ Reward ➡️ Agent
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2>Convolutional Neural Networks (CNNs)</h2>
+                    <p>How the AI "sees" the game. CNNs process raw pixel data from the screen to identify objects and
+                        game state.</p>
+                    <div class="tech-diagram">
+                        Pixels ➡️ Convolution ➡️ Pooling ➡️ Features
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2>Imitation Learning</h2>
+                    <p>Jumpstarting the learning process by mimicking human gameplay videos before self-play begins.</p>
+                    <div class="tech-diagram">
+                        Human Demo ➡️ Supervised Learning ➡️ Policy
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h2>The Loop: From Pixels to Actions</h2>
+                <p>In a typical setup (like DeepMind's Atari agents), the process looks like this:</p>
+                <ol style="margin-left: 2rem; color: var(--text-muted); margin-top: 1rem; line-height: 2;">
+                    <li><strong>Input:</strong> The agent receives a frame of video (pixels).</li>
+                    <li><strong>Processing:</strong> A CNN analyzes the frame to understand the current state (e.g.,
+                        "enemy to the left").</li>
+                    <li><strong>Decision:</strong> The Policy Network decides the best move based on past training.</li>
+                    <li><strong>Action:</strong> The agent presses a virtual button.</li>
+                    <li><strong>Feedback:</strong> The game score updates (Reward), reinforcing the decision.</li>
+                </ol>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AI.Nexus. Built for the Future.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
