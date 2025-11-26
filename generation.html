@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Generation - AI.Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">AI.Nexus</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="education.html">Education</a></li>
+                <li><a href="technical.html">Technical</a></li>
+                <li><a href="games.html">Games</a></li>
+                <li><a href="llm.html">LLMs</a></li>
+                <li><a href="generation.html" class="active">Generation</a></li>
+                <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" style="min-height: 50vh;">
+            <div class="floating-shape shape-1" style="top: 10%; right: 10%;"></div>
+            <div class="container hero-content">
+                <h1>Unleash Your Creativity</h1>
+                <p>Turn your imagination into reality with the power of Generative AI for images and video.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="card-grid">
+                <div class="card">
+                    <h2>Image Generation</h2>
+                    <p>Using diffusion models, AI can generate stunning visuals from simple text descriptions.</p>
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.05); border-radius: 10px;">
+                        <h3 style="color: var(--primary-pink); margin-bottom: 0.5rem;">Top Pick: Night Cafe</h3>
+                        <p>A community-driven platform that offers multiple algorithms (Stable Diffusion, DALL-E 3,
+                            etc.) and daily challenges.</p>
+                        <a href="https://creator.nightcafe.studio/" target="_blank" class="btn btn-primary"
+                            style="margin-top: 1rem; font-size: 0.9rem;">Try Night Cafe</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Video Generation</h2>
+                    <p>The next frontier. AI understands motion and physics to create realistic video clips from text.
+                    </p>
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0,0,0,0.05); border-radius: 10px;">
+                        <h3 style="color: var(--primary-teal); margin-bottom: 0.5rem;">Top Pick: Sora 2</h3>
+                        <p>OpenAI's latest model capable of generating up to minute-long videos with high visual quality
+                            and adherence to the user's prompt.</p>
+                        <span class="btn btn-secondary"
+                            style="margin-top: 1rem; font-size: 0.9rem; cursor: default;">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AI.Nexus. Built for the Future.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
