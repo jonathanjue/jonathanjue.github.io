@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How LLMs Work - AI.Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .token-viz {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 2rem 0;
+            font-size: 1.5rem;
+            font-family: monospace;
+        }
+
+        .token {
+            background: var(--card-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-pink);
+            animation: popIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .token:nth-child(1) {
+            animation-delay: 0.5s;
+        }
+
+        .token:nth-child(2) {
+            animation-delay: 1.0s;
+        }
+
+        .token:nth-child(3) {
+            animation-delay: 1.5s;
+        }
+
+        .token:nth-child(4) {
+            animation-delay: 2.0s;
+        }
+
+        .token:nth-child(5) {
+            animation-delay: 2.5s;
+        }
+
+        .token.predicting {
+            border-style: dashed;
+            border-color: var(--primary-teal);
+            background: rgba(0, 229, 255, 0.1);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .prob-bar {
+            height: 20px;
+            background: var(--primary-teal);
+            border-radius: 10px;
+            margin-top: 5px;
+            width: 0;
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="index.html" class="logo">AI.Nexus</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="education.html">Education</a></li>
+                <li><a href="technical.html">Technical</a></li>
+                <li><a href="games.html">Games</a></li>
+                <li><a href="llm.html" class="active">LLMs</a></li>
+                <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle Dark Mode">🌙</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" style="min-height: 50vh;">
+            <div class="floating-shape shape-2" style="bottom: 10%; left: 5%;"></div>
+            <div class="container hero-content">
+                <h1>Predicting the Future</h1>
+                <p>Large Language Models don't "know" things in the human sense. They are incredibly advanced
+                    statistical engines predicting the next word.</p>
+            </div>
+        </section>
+
+        <section class="container">
+            <div class="card" style="text-align: center; margin-bottom: 4rem;">
+                <h2>The "Next Token" Game</h2>
+                <p>Imagine guessing the next word in a sentence. That's what LLMs do, billions of times a second.</p>
+
+                <div class="token-viz">
+                    <span class="token">The</span>
+                    <span class="token">cat</span>
+                    <span class="token">sat</span>
+                    <span class="token">on</span>
+                    <span class="token">the</span>
+                    <span class="token predicting">???</span>
+                </div>
+
+                <div style="max-width: 400px; margin: 0 auto; text-align: left;">
+                    <div style="margin-bottom: 1rem;">
+                        <span>mat (85%)</span>
+                        <div class="prob-bar" style="width: 85%;"></div>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <span>couch (10%)</span>
+                        <div class="prob-bar" style="width: 10%; background: var(--primary-pink);"></div>
+                    </div>
+                    <div>
+                        <span>floor (5%)</span>
+                        <div class="prob-bar" style="width: 5%; background: var(--accent-purple);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>1. Training Data</h3>
+                    <p>LLMs are fed massive amounts of text from the internet. They learn the statistical relationships
+                        between words (e.g., "King" is to "Queen" as "Man" is to "Woman").</p>
+                </div>
+                <div class="card">
+                    <h3>2. Context Window</h3>
+                    <p>The "memory" of the model during a conversation. It looks at all the previous words (tokens) to
+                        understand the context before making a prediction.</p>
+                </div>
+                <div class="card">
+                    <h3>3. Stochastic Parrots?</h3>
+                    <p>A term coined to describe how LLMs can sound confident and coherent without truly understanding
+                        meaning—they are just probabilistic mimics.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AI.Nexus. Built for the Future.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

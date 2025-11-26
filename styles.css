@@ -3,16 +3,23 @@
     --primary-pink: #FF007F;
     --primary-teal: #00E5FF;
     --accent-purple: #7000FF;
-    
+
+    /* New Gradient Colors */
+    --golden-yellow: #FFD700;
+    --deep-blue: #001f3f;
+    --mesh-purple: #9C27B0;
+
     /* Light Mode Defaults */
-    --bg-color: #F0F2F5;
-    --card-bg: #FFFFFF;
+    --main-bg: linear-gradient(135deg, var(--golden-yellow), var(--mesh-purple), var(--deep-blue));
+    --card-bg: rgba(255, 255, 255, 0.9);
+    /* More opaque for contrast */
     --text-color: #1A1A1A;
-    --text-muted: #666666;
+    --text-muted: #333333;
+    /* Darker for readability on gradient */
     --nav-bg: rgba(255, 255, 255, 0.8);
     --border-color: rgba(0, 0, 0, 0.1);
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
     /* Gradients */
     --main-gradient: linear-gradient(135deg, var(--primary-pink), var(--accent-purple), var(--primary-teal));
     --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
@@ -20,14 +27,14 @@
 
 [data-theme="dark"] {
     /* Dark Mode Defaults */
-    --bg-color: #0A0A12;
+    --main-bg: #0A0A12;
     --card-bg: #161622;
     --text-color: #FFFFFF;
     --text-muted: #A0A0A0;
     --nav-bg: rgba(22, 22, 34, 0.8);
     --border-color: rgba(255, 255, 255, 0.1);
     --shadow: 0 4px 30px rgba(0, 229, 255, 0.15);
-    
+
     --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
 }
 
@@ -40,14 +47,18 @@
 
 body {
     font-family: 'Outfit', 'Inter', sans-serif;
-    background-color: var(--bg-color);
+    background: var(--main-bg);
+    background-attachment: fixed;
     color: var(--text-color);
     line-height: 1.6;
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-weight: 700;
     line-height: 1.2;
 }
@@ -236,9 +247,17 @@ footer {
 
 /* Animations */
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
 }
 
 .floating-shape {
@@ -269,6 +288,13 @@ footer {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-    h1 { font-size: 2.5rem; }
-    .nav-links { display: none; } /* Simplified for now */
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    /* Simplified for now */
 }
