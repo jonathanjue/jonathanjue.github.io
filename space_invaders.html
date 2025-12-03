@@ -120,6 +120,16 @@
             <h1>Game Over</h1>
             <p>Your Score: <span id="finalScore">0</span></p>
             <button id="restartButton">Play Again</button>
+            <button id="mainMenuButton" style="margin-top: 10px;">Return to Main Page</button>
+        </div>
+
+        <div class="game-overlay" id="winOverlay" style="display: none;">
+            <h1>🎉 You Win! 🎉</h1>
+            <p>Congratulations! You completed all levels!</p>
+            <p>Your Score: <span id="winScore">0</span></p>
+            <div id="achievementDisplay" style="margin: 20px 0; font-size: 24px; color: gold;">🏆 Achievement Unlocked: Space Invader Champion! 🏆</div>
+            <button id="winRestartButton">Play Again</button>
+            <button id="winMainMenuButton" style="margin-top: 10px;">Return to Main Page</button>
         </div>
     </div>
 
@@ -134,16 +144,23 @@
         };
 
         const PLAYER_WIDTH = 50;
-        const PLAYER_HEIGHT = 30;
-        const BULLET_WIDTH = 5;
-        const BULLET_HEIGHT = 15;
-        const BULLET_SPEED = 7;
-        const SHOT_COOLDOWN = 300;
-        const MAX_BULLETS = 3;
-        const ENEMY_WIDTH = 40;
-        const ENEMY_HEIGHT = 30;
-        const ENEMY_DESCENT_AMOUNT = 20;
-        const ENEMY_POINTS = 10;
+                const PLAYER_HEIGHT = 30;
+                const BULLET_WIDTH = 5;
+                const BULLET_HEIGHT = 15;
+                const BULLET_SPEED_SLOW = 0.3; // Even slower projectiles
+                const BULLET_SPEED = BULLET_SPEED_SLOW; // Slower projectiles
+                const SHOT_COOLDOWN = 0; // Remove cooldown for rapid firing
+                const BURST_SHOTS = 1; // Number of shots in a burst (1 per click)
+                const BURST_DELAY = 100; // Delay between burst shots (ms)
+                const MAX_BULLETS = Infinity; // Allow unlimited bullets on screen
+                const ENEMY_WIDTH = 40;
+                const ENEMY_HEIGHT = 30;
+                const ENEMY_DESCENT_AMOUNT = 20;
+                const ENEMY_POINTS = 10;
+                const MAX_LEVELS = 3; // Game completes after 3 levels
+                const ENEMY_BASE_SPEED = 0.2; // Much slower enemy movement
+                const BUNKER_WIDTH = 60;
+                const BUNKER_HEIGHT = 40;
 
         // Game State Class
         class GameState {
@@ -210,10 +227,13 @@
                 this.speed = 5;
                 this.color = '#0f0';
                 this.lastShotTime = 0;
+                this.burstActive = false;
+                this.burstCount = 0;
+                this.burstTimer = 0;
             }
 
             move(mouseX, canvasWidth) {
-                // Smooth movement toward mouse position
+                // Smooth movement toward mouse position (horizontal only)
                 this.x += (mouseX - this.x) * 0.1;
 
                 // Constrain to canvas boundaries
@@ -225,18 +245,24 @@
 
             shoot(bullets) {
                 const now = Date.now();
-                if (now - this.lastShotTime > SHOT_COOLDOWN && bullets.length < MAX_BULLETS) {
+
+                // Single shot per click, allow unlimited bullets on screen
+                if (now - this.lastShotTime > SHOT_COOLDOWN) {
+                    // Fire exactly 1 bullet per click
                     bullets.push(new Bullet(
                         this.x,
                         this.y - this.height/2,
-                        BULLET_WIDTH, BULLET_HEIGHT, BULLET_SPEED, -1
+                        BULLET_WIDTH, BULLET_HEIGHT, BULLET_SPEED, -1, 600
                     ));
+
                     this.lastShotTime = now;
                 }
             }
 
             draw(ctx) {
                 ctx.fillStyle = this.color;
+
+                // Draw player ship (triangle) - no rotation
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
                 ctx.lineTo(this.x - this.width/2, this.y + this.height);
@@ -277,20 +303,67 @@
 
         // Bullet Class
         class Bullet extends GameObject {
-            constructor(x, y, width, height, speed, direction) {
+            constructor(x, y, width, height, speed, direction, canvasHeight = 600) {
                 super(x, y, width, height);
                 this.speed = speed;
                 this.direction = direction;
                 this.color = '#0f0';
+                this.canvasHeight = canvasHeight;
             }
 
             update() {
                 this.y += this.speed * this.direction;
+
+                // Different bouncing behavior for player vs enemy bullets
+                if (this.color === '#0f0') { // Player bullets (green)
+                    // Player bullets only bounce off top wall
+                    if (this.y < 0 && this.direction === -1) {
+                        this.direction = 1; // Bounce off top wall only
+                        this.y = 0;
+                    }
+                    // Player bullets destroyed on other walls
+                    else if (this.y > this.canvasHeight || this.x < 0 || this.x > 800) {
+                        return; // Destroy bullet on bottom/left/right walls
+                    }
+                } else { // Enemy bullets (other colors)
+                    // Enemy bullets never bounce - destroyed on any wall
+                    if (this.y < 0 || this.y > this.canvasHeight || this.x < 0 || this.x > 800) {
+                        return; // Destroy enemy bullet on any wall
+                    }
+                }
             }
 
             draw(ctx) {
                 ctx.fillStyle = this.color;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        // Bunker Class
+        class Bunker extends GameObject {
+            constructor(x, y) {
+                super(x, y, BUNKER_WIDTH, BUNKER_HEIGHT);
+                this.health = 100;
+                this.color = '#0ff';
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                // Draw health indicator
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+                // Draw health bar
+                ctx.fillStyle = '#f00';
+                ctx.fillRect(this.x, this.y - 10, this.width * (this.health / 100), 5);
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                return this.health <= 0;
             }
         }
 
@@ -305,16 +378,101 @@
                 );
             }
 
-            handleCollisions(player, enemies, playerBullets, enemyBullets, gameState) {
-                // Player bullets vs enemies
+            handleCollisions(player, enemies, playerBullets, enemyBullets, bunkers, gameState) {
+                // Player bullets vs enemies (with gold bullet 4x4 explosion)
                 for (let bulletIndex = playerBullets.length - 1; bulletIndex >= 0; bulletIndex--) {
                     const bullet = playerBullets[bulletIndex];
                     for (let enemyIndex = enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
                         const enemy = enemies[enemyIndex];
                         if (this.checkCollision(bullet, enemy)) {
-                            gameState.updateScore(ENEMY_POINTS);
+                            let points = ENEMY_POINTS;
+
+                            // Gold bullet behavior - 4x4 explosion
+                            if (bullet.isGold) {
+                                points = ENEMY_POINTS * 4; // 4x damage for gold bullets
+
+                                // Find and destroy enemies in 4x4 radius
+                                for (let rEnemyIndex = enemies.length - 1; rEnemyIndex >= 0; rEnemyIndex--) {
+                                    const rEnemy = enemies[rEnemyIndex];
+                                    const distance = Math.sqrt(
+                                        Math.pow(bullet.x - rEnemy.x, 2) +
+                                        Math.pow(bullet.y - rEnemy.y, 2)
+                                    );
+
+                                    // Check if enemy is within 4x4 grid radius (using enemy width as unit)
+                                    if (distance < ENEMY_WIDTH * 4) {
+                                        enemies.splice(rEnemyIndex, 1);
+                                    }
+                                }
+                            }
+
+                            // All bullets destroy after 1 hit
                             playerBullets.splice(bulletIndex, 1);
-                            enemies.splice(enemyIndex, 1);
+
+                            gameState.updateScore(points);
+                            enemies.splice(enemyIndex, 1); // Destroy enemy
+                            break;
+                        }
+                    }
+                }
+
+                // Player bullets vs bunkers
+                for (let bulletIndex = playerBullets.length - 1; bulletIndex >= 0; bulletIndex--) {
+                    const bullet = playerBullets[bulletIndex];
+                    for (let bunkerIndex = bunkers.length - 1; bunkerIndex >= 0; bunkerIndex--) {
+                        const bunker = bunkers[bunkerIndex];
+                        if (this.checkCollision(bullet, bunker)) {
+                            const destroyed = bunker.takeDamage(20);
+                            playerBullets.splice(bulletIndex, 1);
+                            if (destroyed) {
+                                bunkers.splice(bunkerIndex, 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Enemy bullets vs bunkers
+                for (let bulletIndex = enemyBullets.length - 1; bulletIndex >= 0; bulletIndex--) {
+                    const bullet = enemyBullets[bulletIndex];
+                    for (let bunkerIndex = bunkers.length - 1; bunkerIndex >= 0; bunkerIndex--) {
+                        const bunker = bunkers[bunkerIndex];
+                        if (this.checkCollision(bullet, bunker)) {
+                            const destroyed = bunker.takeDamage(20);
+                            enemyBullets.splice(bulletIndex, 1);
+                            if (destroyed) {
+                                bunkers.splice(bunkerIndex, 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Projectile collision (player bullets vs enemy bullets) - create gold explosion bullet
+                for (let pBulletIndex = playerBullets.length - 1; pBulletIndex >= 0; pBulletIndex--) {
+                    const pBullet = playerBullets[pBulletIndex];
+                    for (let eBulletIndex = enemyBullets.length - 1; eBulletIndex >= 0; eBulletIndex--) {
+                        const eBullet = enemyBullets[eBulletIndex];
+                        if (this.checkCollision(pBullet, eBullet)) {
+                            // Create gold bullet that causes 4x4 explosion
+                            const goldBullet = new Bullet(
+                                pBullet.x, pBullet.y,
+                                BULLET_WIDTH * 2, BULLET_HEIGHT * 2, // Larger gold bullet
+                                BULLET_SPEED, -1, 600
+                            );
+                            goldBullet.color = '#ff0'; // Gold color
+                            goldBullet.isGold = true; // Mark as gold bullet for explosion
+
+                            // Remove original bullets
+                            playerBullets.splice(pBulletIndex, 1);
+                            enemyBullets.splice(eBulletIndex, 1);
+
+                            // Add gold bullet
+                            playerBullets.push(goldBullet);
+
+                            // Unlock bullet collision achievement
+                            localStorage.setItem('bulletCollisionMaster', 'true');
+
                             break;
                         }
                     }
@@ -349,6 +507,7 @@
                 this.enemies = [];
                 this.bullets = [];
                 this.enemyBullets = [];
+                this.bunkers = [];
                 this.enemyDirection = 1;
                 this.lastFrameTime = 0;
                 this.currentState = GAME_STATES.MENU;
@@ -379,6 +538,7 @@
                     }
                 });
 
+
                 // UI buttons
                 document.getElementById('startButton').addEventListener('click', () => {
                     this.startGame();
@@ -387,6 +547,19 @@
                 document.getElementById('restartButton').addEventListener('click', () => {
                     this.resetGame();
                     this.startGame();
+                });
+
+                document.getElementById('mainMenuButton').addEventListener('click', () => {
+                    window.location.href = 'games.html';
+                });
+
+                document.getElementById('winRestartButton').addEventListener('click', () => {
+                    this.resetGame();
+                    this.startGame();
+                });
+
+                document.getElementById('winMainMenuButton').addEventListener('click', () => {
+                    window.location.href = 'games.html';
                 });
             }
 
@@ -401,9 +574,25 @@
                     for (let col = 0; col < cols; col++) {
                         const x = startX + col * (ENEMY_WIDTH + padding);
                         const y = startY + row * (ENEMY_HEIGHT + padding);
-                        const speed = 1 + (row * 0.2); // Faster enemies in lower rows
+                        const speed = ENEMY_BASE_SPEED + (row * 0.1); // Slower enemies with gradual increase
                         this.enemies.push(new Enemy(x, y, ENEMY_WIDTH, ENEMY_HEIGHT, speed));
                     }
+                }
+
+                // Create bunkers for the first level
+                if (this.gameState.level === 1) {
+                    this.createBunkers();
+                }
+            }
+
+            createBunkers() {
+                const bunkerCount = 4;
+                const bunkerSpacing = this.canvas.width / (bunkerCount + 1);
+
+                for (let i = 0; i < bunkerCount; i++) {
+                    const x = bunkerSpacing * (i + 1) - BUNKER_WIDTH / 2;
+                    const y = this.canvas.height - 150;
+                    this.bunkers.push(new Bunker(x, y));
                 }
             }
 
@@ -432,20 +621,14 @@
                 // Update player
                 this.player.update();
 
-                // Update bullets
+                // Update bullets (now with wall bouncing, so no removal)
                 for (let i = this.bullets.length - 1; i >= 0; i--) {
                     this.bullets[i].update();
-                    if (this.bullets[i].y < 0) {
-                        this.bullets.splice(i, 1);
-                    }
                 }
 
-                // Update enemy bullets
+                // Update enemy bullets (now with wall bouncing, so no removal)
                 for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
                     this.enemyBullets[i].update();
-                    if (this.enemyBullets[i].y > this.canvas.height) {
-                        this.enemyBullets.splice(i, 1);
-                    }
                 }
 
                 // Update enemies
@@ -458,7 +641,7 @@
                         this.enemyBullets.push(new Bullet(
                             shootingEnemy.x + shootingEnemy.width/2,
                             shootingEnemy.y + shootingEnemy.height,
-                            5, 15, 3, 1
+                            5, 15, BULLET_SPEED, 1, 600
                         ));
                     }
                 }
@@ -469,13 +652,18 @@
                     this.enemies,
                     this.bullets,
                     this.enemyBullets,
+                    this.bunkers,
                     this.gameState
                 );
 
                 // Check win condition
                 if (this.enemies.length === 0) {
-                    this.gameState.nextLevel();
-                    this.createEnemies();
+                    if (this.gameState.level >= MAX_LEVELS) {
+                        this.gameWin();
+                    } else {
+                        this.gameState.nextLevel();
+                        this.createEnemies();
+                    }
                 }
 
                 // Check game over
@@ -490,6 +678,9 @@
 
                 // Draw player
                 this.player.draw(this.ctx);
+
+                // Draw bunkers
+                this.bunkers.forEach(bunker => bunker.draw(this.ctx));
 
                 // Draw bullets
                 this.bullets.forEach(bullet => bullet.draw(this.ctx));
@@ -545,12 +736,22 @@
                 document.getElementById('finalScore').textContent = this.gameState.score;
             }
 
+            gameWin() {
+                this.currentState = GAME_STATES.GAME_OVER;
+                document.getElementById('winOverlay').style.display = 'flex';
+                document.getElementById('winScore').textContent = this.gameState.score;
+
+                // Unlock achievement
+                localStorage.setItem('spaceInvaderChampion', 'true');
+            }
+
             resetGame() {
                 this.gameState = new GameState();
                 this.player = new Player(this.canvas.width/2, this.canvas.height - 50);
                 this.enemies = [];
                 this.bullets = [];
                 this.enemyBullets = [];
+                this.bunkers = [];
                 this.enemyDirection = 1;
                 this.createEnemies();
                 this.updateUI();
